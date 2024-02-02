@@ -15,12 +15,28 @@ export const App = () => {
     return People.find({}).fetch();
   });
 
-  const peopleInEvent = useTracker(() => {
+  const attendees = useTracker(() => {
     if (selectedEvent) {
-      Meteor.subscribe('event.attendees', selectedEvent);
+      Meteor.subscribe('events.attendees', selectedEvent);
     }
-    const data = People.find({ communityId: selectedEvent, checkedOutAt: { $exists: false }, checkedInAt: { $lte: new Date() } });
-    return data.count();
+
+    const peopleData = People.find({ communityId: selectedEvent, checkedOutAt: { $exists: false }, checkedInAt: { $lte: new Date() } });
+    return peopleData.count();
+  });
+
+  const attendeesByCompany = useTracker(() => {
+    if (selectedEvent) {
+      Meteor.subscribe('events.attendeesByCompany', selectedEvent);
+    }
+
+    const peopleData = People.find({ communityId: selectedEvent, checkedOutAt: { $exists: false }, checkedInAt: { $lte: new Date() } });
+    const companies = peopleData.map((person) => person.companyName);
+    const companyCount = companies.reduce((acc, company) => {
+      acc[company] = (acc[company] || 0) + 1;
+      return acc;
+    }, {});
+
+    return companyCount;
   });
 
   useEffect(() => {
@@ -50,7 +66,12 @@ export const App = () => {
         ))}
       </select>
 
-      <p>People in the event right now: {peopleInEvent}</p>
+      <p>People in the event right now: {attendees}</p>
+      <p>
+        People by company in the event right now: {Object.keys(attendeesByCompany).map((company) => (
+          <span key={company}>{company}: {attendeesByCompany[company]}&nbsp;</span>
+        ))}
+      </p>
 
       <table>
         <thead>
