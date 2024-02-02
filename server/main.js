@@ -5,6 +5,15 @@ import { Communities } from '../communities/communities';
 
 Meteor.publish('people', (eventId) => People.find({ communityId: eventId }));
 
+Meteor.publish('event.attendees', function (eventId) {
+  const sub = this;
+  const people = People.find({ communityId: eventId, checkedOutAt: { $exists: false }, checkedInAt: { $lte: new Date() } });
+  const count = people.count();
+
+  sub.added('attendees', eventId, { count });
+  sub.ready();
+});
+
 Meteor.startup(() => {
   // DON'T CHANGE THE NEXT LINE
   loadInitialData();

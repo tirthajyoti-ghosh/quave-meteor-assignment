@@ -15,6 +15,14 @@ export const App = () => {
     return People.find({}).fetch();
   });
 
+  const peopleInEvent = useTracker(() => {
+    if (selectedEvent) {
+      Meteor.subscribe('event.attendees', selectedEvent);
+    }
+    const data = People.find({ communityId: selectedEvent, checkedOutAt: { $exists: false }, checkedInAt: { $lte: new Date() } });
+    return data.count();
+  });
+
   useEffect(() => {
     Meteor.call('events.list', (err, res) => {
       if (err) {
@@ -41,6 +49,8 @@ export const App = () => {
           <option key={event._id} value={event._id}>{event.name}</option>
         ))}
       </select>
+
+      <p>People in the event right now: {peopleInEvent}</p>
 
       <table>
         <thead>
