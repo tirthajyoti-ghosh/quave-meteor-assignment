@@ -14,7 +14,6 @@ Meteor.publish('events.attendees', function (eventId) {
   sub.ready();
 });
 
-// no. of people grouped by company in an event
 Meteor.publish('events.attendeesByCompany', function (eventId) {
   const sub = this;
   const people = People.find({ communityId: eventId, checkedOutAt: { $exists: false }, checkedInAt: { $lte: new Date() } });
@@ -25,6 +24,15 @@ Meteor.publish('events.attendeesByCompany', function (eventId) {
   }, {});
 
   sub.added('events.attendeesByCompany', eventId, companyCount);
+  sub.ready();
+});
+
+Meteor.publish('events.notCheckedIn', function (eventId) {
+  const sub = this;
+  const people = People.find({ communityId: eventId, $or: [{ checkedOutAt: { $exists: true } }, { checkedInAt: { $exists: false } }] });
+  const count = people.count();
+
+  sub.added('events.notCheckedIn', eventId, { count });
   sub.ready();
 });
 

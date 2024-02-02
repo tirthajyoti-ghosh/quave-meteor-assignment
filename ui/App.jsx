@@ -39,11 +39,18 @@ export const App = () => {
     return companyCount;
   });
 
+  const peopleNotCheckedIn = useTracker(() => {
+    if (selectedEvent) {
+      Meteor.subscribe('events.notCheckedIn', selectedEvent);
+    }
+
+    const peopleData = People.find({ communityId: selectedEvent, $or: [{ checkedOutAt: { $exists: true } }, { checkedInAt: { $exists: false } }] });
+    return peopleData.count();
+  });
+
   useEffect(() => {
     Meteor.call('events.list', (err, res) => {
-      if (err) {
-        console.log(err);
-      } else {
+      if (!err) {
         setEvents(res);
       }
     });
@@ -72,6 +79,7 @@ export const App = () => {
           <span key={company}>{company}: {attendeesByCompany[company]}&nbsp;</span>
         ))}
       </p>
+      <p>People not checked-in: {peopleNotCheckedIn}</p>
 
       <table>
         <thead>
