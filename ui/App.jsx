@@ -8,44 +8,42 @@ export const App = () => {
   const [selectedEvent, setSelectedEvent] = useState('');
   const [events, setEvents] = useState([]);
 
-  const people = useTracker(() => {
+  const {
+    people,
+    attendees,
+    attendeesByCompany,
+    peopleNotCheckedIn,
+  } = useTracker(() => {
     if (selectedEvent) {
       Meteor.subscribe('people', selectedEvent);
     }
-    return People.find({}).fetch();
-  });
 
-  const attendees = useTracker(() => {
-    if (selectedEvent) {
-      Meteor.subscribe('events.attendees', selectedEvent);
-    }
+    const peopleData = People.find({}).fetch();
 
-    const peopleData = People.find({ communityId: selectedEvent, checkedOutAt: { $exists: false }, checkedInAt: { $lte: new Date() } });
-    return peopleData.count();
-  });
+    const eventStatsData = People.find({
+      checkedOutAt: { $exists: false },
+      checkedInAt: { $lte: new Date() },
+    });
 
-  const attendeesByCompany = useTracker(() => {
-    if (selectedEvent) {
-      Meteor.subscribe('events.attendeesByCompany', selectedEvent);
-    }
-
-    const peopleData = People.find({ communityId: selectedEvent, checkedOutAt: { $exists: false }, checkedInAt: { $lte: new Date() } });
-    const companies = peopleData.map((person) => person.companyName);
+    const companies = eventStatsData.fetch().map(person => person.companyName);
     const companyCount = companies.reduce((acc, company) => {
       acc[company] = (acc[company] || 0) + 1;
       return acc;
     }, {});
 
-    return companyCount;
-  });
+    const peopleNotCheckedInData = People.find({
+      $or: [
+        { checkedOutAt: { $exists: true } },
+        { checkedInAt: { $exists: false } },
+      ],
+    });
 
-  const peopleNotCheckedIn = useTracker(() => {
-    if (selectedEvent) {
-      Meteor.subscribe('events.notCheckedIn', selectedEvent);
-    }
-
-    const peopleData = People.find({ communityId: selectedEvent, $or: [{ checkedOutAt: { $exists: true } }, { checkedInAt: { $exists: false } }] });
-    return peopleData.count();
+    return {
+      people: peopleData,
+      attendees: eventStatsData.count(),
+      attendeesByCompany: companyCount,
+      peopleNotCheckedIn: peopleNotCheckedInData.count(),
+    };
   });
 
   useEffect(() => {
@@ -61,25 +59,30 @@ export const App = () => {
       <h1>Event Check-in System</h1>
       <select
         value={selectedEvent}
-        onChange={(e) => {
-          setSelectedEvent(e.target.value);
-          // fetchPeople(e.target.value);
-        }}
+        onChange={e => setSelectedEvent(e.target.value)}
       >
         <option value="">Select an Event</option>
-        {/* Render events dynamically */}
-        {events.map((event) => (
-          <option key={event._id} value={event._id}>{event.name}</option>
+        {events.map(event => (
+          <option key={event._id} value={event._id}>
+            {event.name}
+          </option>
         ))}
       </select>
 
-      <p>People in the event right now: {attendees}</p>
-      <p>
-        People by company in the event right now: {Object.keys(attendeesByCompany).map((company) => (
-          <span key={company}>{company}: {attendeesByCompany[company]}&nbsp;</span>
-        ))}
-      </p>
-      <p>People not checked-in: {peopleNotCheckedIn}</p>
+      {selectedEvent && (
+        <div>
+          <p>People in the event right now: {attendees}</p>
+          <p>
+            People by company in the event right now:{' '}
+            {Object.keys(attendeesByCompany).map(company => (
+              <span key={company}>
+                {company}: {attendeesByCompany[company]}&nbsp;
+              </span>
+            ))}
+          </p>
+          <p>People not checked-in: {peopleNotCheckedIn}</p>
+        </div>
+      )}
 
       <table>
         <thead>
@@ -100,9 +103,7 @@ export const App = () => {
               <td>{person.title}</td>
               <td>{person.checkedInAt ? person.checkedInAt.toLocaleString() : 'N/A'}</td>
               <td>{person.checkedOutAt ? person.checkedOutAt.toLocaleString() : 'N/A'}</td>
-              <td>
-                <ActionButton person={person} />
-              </td>
+              <td><ActionButton person={person} /></td>
             </tr>
           ))}
         </tbody>
