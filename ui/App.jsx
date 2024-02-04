@@ -1,50 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { useTracker } from 'meteor/react-meteor-data';
+import { Mongo } from 'meteor/mongo';
 import { People } from '../people/people';
 import { ActionButton } from './ActionButton.jsx';
+
+const EventStats = new Mongo.Collection('events.stats');
 
 export const App = () => {
   const [selectedEvent, setSelectedEvent] = useState('');
   const [events, setEvents] = useState([]);
+  const [page, setPage] = useState(1);
+
+  const people = useTracker(() => {
+    const skip = (page - 1) * 10;
+    if (selectedEvent) {
+      const handle = Meteor.subscribe('people', selectedEvent, skip, 10);
+      if (handle.ready()) {
+        return People.find({}).fetch();
+      }
+    }
+    return [];
+  });
 
   const {
-    people,
     attendees,
     attendeesByCompany,
     peopleNotCheckedIn,
   } = useTracker(() => {
-    if (selectedEvent) {
-      Meteor.subscribe('people', selectedEvent);
-    }
+    const noData = { attendees: 0, attendeesByCompany: [], peopleNotCheckedIn: 0 };
+    if (!selectedEvent) return noData;
 
-    const peopleData = People.find({}).fetch();
+    const handle = Meteor.subscribe('events.stats', selectedEvent);
+    if (!handle.ready()) return noData;
 
-    const eventStatsData = People.find({
-      checkedOutAt: { $exists: false },
-      checkedInAt: { $lte: new Date() },
-    });
-
-    const companies = eventStatsData.fetch().map(person => person.companyName);
-    const companyCount = companies.reduce((acc, company) => {
-      acc[company] = (acc[company] || 0) + 1;
-      return acc;
-    }, {});
-
-    const peopleNotCheckedInData = People.find({
-      $or: [
-        { checkedOutAt: { $exists: true } },
-        { checkedInAt: { $exists: false } },
-      ],
-    });
-
-    return {
-      people: peopleData,
-      attendees: eventStatsData.count(),
-      attendeesByCompany: companyCount,
-      peopleNotCheckedIn: peopleNotCheckedInData.count(),
-    };
+    return EventStats.findOne(selectedEvent);
   });
+
+  // Reset page when selected event changes
+  useEffect(() => {
+    setPage(1);
+  }, [selectedEvent]);
 
   useEffect(() => {
     Meteor.call('events.list', (err, res) => {
@@ -74,16 +70,21 @@ export const App = () => {
           <p>People in the event right now: {attendees}</p>
           <p>
             People by company in the event right now:{' '}
-            {Object.keys(attendeesByCompany).map(company => (
+            {attendeesByCompany.map(({ company, count }) => (
               <span key={company}>
-                {company}: {attendeesByCompany[company]}&nbsp;
+                {company} ({count}){', '}
               </span>
             ))}
           </p>
           <p>People not checked-in: {peopleNotCheckedIn}</p>
         </div>
       )}
-
+      <button onClick={() => setPage(page - 1)} disabled={page === 1}>
+        Previous
+      </button>
+      <button onClick={() => setPage(page + 1)} disabled={people.length < 10}>
+        Next
+      </button>
       <table>
         <thead>
           <tr>
