@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Mongo } from 'meteor/mongo';
+import { Texts } from '../infra/constants';
 import { People } from '../people/people';
 import { ActionButton } from './ActionButton.jsx';
 
@@ -37,11 +38,6 @@ export const App = () => {
     return EventStats.findOne(selectedEvent);
   });
 
-  // Reset page when selected event changes
-  useEffect(() => {
-    setPage(1);
-  }, [selectedEvent]);
-
   useEffect(() => {
     Meteor.call('events.list', (err, res) => {
       if (!err) {
@@ -52,10 +48,13 @@ export const App = () => {
 
   return (
     <div>
-      <h1>Event Check-in System</h1>
+      <h1>{Texts.HOME_TITLE}</h1>
       <select
         value={selectedEvent}
-        onChange={e => setSelectedEvent(e.target.value)}
+        onChange={e => {
+          setSelectedEvent(e.target.value);
+          setPage(1);
+        }}
       >
         <option value="">Select an Event</option>
         {events.map(event => (
