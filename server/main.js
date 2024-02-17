@@ -55,12 +55,12 @@ Meteor.publish('events.stats', function (eventId) {
 
   const self = this;
 
-  self.added('events.stats', eventId, calculateStats());
+  self.added('events.stats', eventId, calculateStats(eventId));
   self.ready();
 
   const handle = People.find({ communityId: eventId }).observeChanges({
     changed: () => {
-      self.changed('events.stats', eventId, calculateStats());
+      self.changed('events.stats', eventId, calculateStats(eventId));
     },
   });
 
