@@ -4,6 +4,17 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { People } from '../people/people';
 import { ActionButton } from './ActionButton.jsx';
 
+function formatDate(date) {
+  return `${date.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+  })}, ${date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })}`;
+}
+
 export function PeopleTable({ selectedEvent }) {
   const [page, setPage] = useState(1);
 
@@ -109,12 +120,12 @@ export function PeopleTable({ selectedEvent }) {
                 <td className="px-6 py-4">{person.title}</td>
                 <td className="px-6 py-4">
                   {person.checkedInAt
-                    ? person.checkedInAt.toLocaleString()
+                    ? formatDate(person.checkedInAt)
                     : 'N/A'}
                 </td>
                 <td className="px-6 py-4">
                   {person.checkedOutAt
-                    ? person.checkedOutAt.toLocaleString()
+                    ? formatDate(person.checkedOutAt)
                     : 'N/A'}
                 </td>
                 <td className="px-6 py-4">

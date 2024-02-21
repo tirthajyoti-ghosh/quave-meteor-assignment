@@ -25,7 +25,7 @@ export function EventStatsDisplay({ selectedEvent }) {
   return (
     <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-4 mt-5 mb-5">
       <div className="max-w-xs gap-y-4">
-        <div className="text-base leading-7 text-gray-600">
+        <div className="text-base leading-7 text-gray-600 mb-3">
           People in the event right now
         </div>
         <div className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
@@ -33,7 +33,7 @@ export function EventStatsDisplay({ selectedEvent }) {
         </div>
       </div>
       <div className="max-w-xs gap-y-4">
-        <div className="text-base leading-7 text-gray-600">
+        <div className="text-base leading-7 text-gray-600 mb-3">
           People by company in the event right now
         </div>
         {attendeesByCompany.map(({ company, count }) => (
@@ -46,7 +46,7 @@ export function EventStatsDisplay({ selectedEvent }) {
         ))}
       </div>
       <div className="max-w-xs gap-y-4">
-        <div className="text-base leading-7 text-gray-600">
+        <div className="text-base leading-7 text-gray-600 mb-3">
           People not checked-in
         </div>
         <div className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
