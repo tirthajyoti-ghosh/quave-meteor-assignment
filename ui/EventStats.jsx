@@ -23,17 +23,18 @@ export function EventStatsDisplay({ selectedEvent }) {
   );
 
   return (
-    <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-4 mt-5 mb-5">
-      <div className="max-w-xs gap-y-4">
-        <div className="text-base leading-7 text-gray-600 mb-3">
+    <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-4 mt-5 mb-5 min-h-[200px]">
+      <div className="max-w-xs gap-y-4 md:border-r-2 border-gray-200 pr-4 border-b-2 md:border-b-0 pb-5 md:pb-0">
+        <div className="text-base leading-7 text-gray-600 mb-3 md:text-center">
           People in the event right now
         </div>
-        <div className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+        <div className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl md:text-center">
           {attendees}
         </div>
       </div>
-      <div className="max-w-xs gap-y-4">
-        <div className="text-base leading-7 text-gray-600 mb-3">
+
+      <div className="max-w-xs gap-y-4 border-b-2 border-gray-200 pb-5 md:border-none md:pb-0">
+        <div className="text-base leading-7 text-gray-600 mb-3 md:text-center">
           People by company in the event right now
         </div>
         {attendeesByCompany.map(({ company, count }) => (
@@ -45,11 +46,12 @@ export function EventStatsDisplay({ selectedEvent }) {
           </span>
         ))}
       </div>
-      <div className="max-w-xs gap-y-4">
-        <div className="text-base leading-7 text-gray-600 mb-3">
+
+      <div className="max-w-xs gap-y-4 md:border-l-2 border-gray-200 lg:pl-4 border-l-0">
+        <div className="text-base leading-7 text-gray-600 mb-3 md:text-center">
           People not checked-in
         </div>
-        <div className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+        <div className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl md:text-center">
           {peopleNotCheckedIn}
         </div>
       </div>
