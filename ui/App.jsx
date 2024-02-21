@@ -20,7 +20,7 @@ export const App = () => {
 
       {selectedEvent && <EventStats selectedEvent={selectedEvent} />}
 
-      <PeopleTable selectedEvent={selectedEvent} />
+      <PeopleTable key={selectedEvent} selectedEvent={selectedEvent} />
     </div>
   );
 };
