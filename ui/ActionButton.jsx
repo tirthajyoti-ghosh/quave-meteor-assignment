@@ -7,7 +7,8 @@ export function ActionButton({ person }) {
   useEffect(() => {
     let timeoutId;
     if (person && person.checkedInAt) {
-      const timeLeft = new Date(person.checkedInAt.getTime() + 5000) - new Date();
+      const timeLeft =
+        new Date(person.checkedInAt.getTime() + 5000) - new Date();
       if (timeLeft > 0) {
         setCanCheckOut(false);
         timeoutId = setTimeout(() => setCanCheckOut(true), timeLeft);
@@ -25,14 +26,21 @@ export function ActionButton({ person }) {
 
   if (!person.checkedInAt || person.checkedOutAt) {
     return (
-      <button onClick={() => Meteor.call('people.checkIn', person._id)}>
+      <button
+        onClick={() => Meteor.call('people.checkIn', person._id)}
+        className="font-medium text-indigo-600 dark:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         Check-in {person.firstName} {person.lastName}
       </button>
     );
   }
 
   return (
-    <button disabled={!canCheckOut} onClick={() => Meteor.call('people.checkOut', person._id)}>
+    <button
+      disabled={!canCheckOut}
+      onClick={() => Meteor.call('people.checkOut', person._id)}
+      className="font-medium text-indigo-600 dark:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
       Check-out {person.firstName} {person.lastName}
     </button>
   );
